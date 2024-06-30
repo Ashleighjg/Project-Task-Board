@@ -2,6 +2,18 @@
 let taskList = JSON.parse(localStorage.getItem("tasks"));
 let nextId = JSON.parse(localStorage.getItem("nextId"));
 
+const openModalBtn = $('#openModel');
+const taskModal = $('#taskModal');
+const taskForm = $('#taskForm');
+const closeBtn = $('.close');
+const taskNameInputEl = $('#taskName');
+const taskDueDateInputEl = $('#taskDueDate');
+const taskDescriptionInputEl = $('#taskDescription');
+
+
+
+
+
 // Todo: create a function to generate a unique task id
 function generateTaskId() {
     const timestamp = new Date().getTime(); // Get current timestamp
@@ -85,8 +97,8 @@ function handleAddTask(event){
 
     // TODO: Get the project name, type, and due date from the form
     const taskName = TaskNameInputEl.val().trim();
-    const taskDescription = TaskTypeInputEl.val();
-    const taskDueDate = TaskDateInputEl.val();
+    const taskDescription = TaskDescriptionInputEl.val();
+    const taskDueDate = TaskDueDateInputEl.val();
   
   
     // ? Create a new project object with the data from the form
@@ -94,8 +106,8 @@ function handleAddTask(event){
       // ? Here we use a tool called `crypto` to generate a random id for our project. This is a unique identifier that we can use to find the project in the array. `crypto` is a built-in module that we can use in the browser and Nodejs.
      // id: crypto.randomUUID(),
       name: taskName,
-      description: taskType,
-      dueDate: taskDate,
+      description: taskDescription,
+      dueDate: taskDueDate,
       status: 'to-do',
     };
   
@@ -160,7 +172,7 @@ $(document).ready(function () {
      function printTaskData() {
         const Tasks = renderTaskList();
       
-        // ? Empty existing project cards out of the lanes
+       // ? Empty existing project cards out of the lanes
         const todoList = $('#todo-cards');
         todoList.empty();
       
@@ -170,6 +182,7 @@ $(document).ready(function () {
         const doneList = $('#done-cards');
         doneList.empty();
     }
+        
         // TODO: Loop through projects and create project cards for each status
         for (let task of tasks) {
           if (task.status === 'to-do') {
@@ -191,4 +204,35 @@ $(document).ready(function () {
       accept: '.draggable',
       drop: handleDrop,
     });
+
+
+
+      // Open the modal
+      openModalBtn.on('click', function() {
+        taskModal.show();
+    
+        $('#taskDueDate').datepicker({
+          changeMonth: true,
+          changeYear: true,
+        });
+
+        // Close the modal
+      closeBtn.on('click', function() {
+        taskModal.hide();
+      });
+    
+      // Form submission
+     taskForm.on ('submit', handleAddTask);
+        // Clear the form
+        taskForm[0].reset();
+    
+        // Close the modal
+        taskModal.hide();
+      });
+    
+      
+      
+    
+    
+    
 });
