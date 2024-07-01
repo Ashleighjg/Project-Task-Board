@@ -1,15 +1,14 @@
 // Retrieve tasks and nextId from localStorage
 let taskList = JSON.parse(localStorage.getItem("tasks"));
 let nextId = JSON.parse(localStorage.getItem("nextId"));
-
+const TaskId = generateTaskId();
+const formModal = document.getElementById('formModal');
 const openModalBtn = $('#openModel');
-const taskModal = $('#taskModal');
-const taskForm = $('#taskForm');
+const taskForm = $('.modal-body');
 const closeBtn = $('.close');
 const taskNameInputEl = $('#taskName');
 const taskDueDateInputEl = $('#taskDueDate');
 const taskDescriptionInputEl = $('#taskDescription');
-
 
 
 
@@ -21,7 +20,7 @@ function generateTaskId() {
     return `${timestamp}-${randomNum}`; // Combine timestamp and random number
                               
 }
-const TaskId = generateTaskId();
+
 
 
 // Todo: create a function to create a task card
@@ -73,7 +72,7 @@ function createTaskCard(task) {
 
 // Todo: create a function to render the task list and make cards draggable
 function renderTaskList() {
-    let Tasks = JSON.parse(localStorage.getItem('tasks'));
+    let tasks = JSON.parse(localStorage.getItem('tasks'));
 
     $( function() {
         $( "#draggable" ).draggable();
@@ -85,21 +84,21 @@ function renderTaskList() {
   }
 
   return tasks;
-
-  
-
-
 }
 
 // Todo: create a function to handle adding a new task
 function handleAddTask(event){
-    event.preventDefault();
+   //event.preventDefault();
+
+
+    $(document).on('shown.bs.modal','#formModal', function () {
+
 
     // TODO: Get the project name, type, and due date from the form
-    const taskName = TaskNameInputEl.val().trim();
-    const taskDescription = TaskDescriptionInputEl.val();
-    const taskDueDate = TaskDueDateInputEl.val();
-  
+    const taskName = taskNameInputEl.val().trim();
+    const taskDescription = taskDescriptionInputEl.val().trim();
+    const taskDueDate = taskDueDateInputEl.val();
+   
   
     // ? Create a new project object with the data from the form
     const newTask = {
@@ -110,21 +109,41 @@ function handleAddTask(event){
       dueDate: taskDueDate,
       status: 'to-do',
     };
+
+    // ? Pull the projects from localStorage and push the new project to the array 
+      const tasks = renderTaskList();
+      tasks.push(newTask);
+
+    // Close the modal
+    closeBtn.on('click', function() {
+      taskModal.hide();
+    });
   
-    // ? Pull the projects from localStorage and push the new project to the array
-    const tasks = renderTaskList();
-    tasks.push(newTask);
+    // Form submission
+      taskForm.on ('submit', createTaskCard);
+
+      
+      // Clear the form
+      //taskForm[0].reset();
+  });
+  
+       
+   
+
+   
+  };
+  
+  
+    
+   
   
     // ? Save the updated projects array to localStorage
-    handleDrop(tasks);
-  
-   
+    //handleDrop(tasks);
 
-   
-    }
+
 
 // Todo: create a function to handle deleting a task
-function handleDeleteTask(event){
+/*function handleDeleteTask(event){
     const taskId = $(this).attr('data-task-id');
     const tasks = renderTaskList();
   
@@ -141,7 +160,7 @@ function handleDeleteTask(event){
     // ? Here we use our other function to print projects back to the screen
     handleAddTask();
 }
-
+*/
 // Todo: create a function to handle dropping a task into a new status lane
 function handleDrop(event, ui) {
     
@@ -161,78 +180,59 @@ function handleDrop(event, ui) {
           }
         }
         // ? Save the updated projects array to localStorage (overwritting the previous one) and render the new project data to the screen.
-        localStorage.setItem('Tasks', JSON.stringify(tasks));
+        saveTaskData();
         printTaskData();
-}
+};
 
+  function saveTaskData(){
+  localStorage.setItem('tasks', JSON.stringify(tasks))
+};
+
+// ? Print project data back to the screen
+
+function printTaskData() {
+  const tasks = renderTaskList();
+
+ // ? Empty existing project cards out of the lanes
+  const todoList = $('#todo-cards');
+  todoList.empty();
+
+  const inProgressList = $('#in-progress-cards');
+  inProgressList.empty();
+
+  const doneList = $('#done-cards');
+  doneList.empty();
+
+
+  // TODO: Loop through projects and create project cards for each status
+  for (let task of tasks) {
+    if (task.status === 'to-do') {
+      todoList.append(createTaskCard(task));
+     } else if (task.status === 'in-progress') {
+      inProgressList.append(createTaskCard(task));
+     } else if (task.status === 'done') {
+      doneList.append(createTaskCard(task));
+     }
+  }
+handleAddTask();
+   
+};
 
 // Todo: when the page loads, render the task list, add event listeners, make lanes droppable, and make the due date field a date picker
 $(document).ready(function () {
-     // ? Print project data back to the screen
-     function printTaskData() {
-        const Tasks = renderTaskList();
-      
-       // ? Empty existing project cards out of the lanes
-        const todoList = $('#todo-cards');
-        todoList.empty();
-      
-        const inProgressList = $('#in-progress-cards');
-        inProgressList.empty();
-      
-        const doneList = $('#done-cards');
-        doneList.empty();
-    }
-        
-        // TODO: Loop through projects and create project cards for each status
-        for (let task of tasks) {
-          if (task.status === 'to-do') {
-            todoList.append(createTaskCard(task));
-           } else if (task.status === 'in-progress') {
-            inProgressList.append(createTaskCard(task));
-           } else if (task.status === 'done') {
-            doneList.append(createTaskCard(task));
-           }
-        }
 
-    $('#taskDueDate').datepicker({
-      changeMonth: true,
-      changeYear: true,
+  printTaskData();
+  handleAddTask();
+    
+  $('#taskDueDate').datepicker({
+    changeMonth: true,
+    changeYear: true,
     });
-  
+
     // ? Make lanes droppable
-    $('.lane').droppable({
-      accept: '.draggable',
-      drop: handleDrop,
-    });
+  $('.lane').droppable({
+    accept: '.draggable',
+    drop: handleDrop,
+  });
 
-
-
-      // Open the modal
-      openModalBtn.on('click', function() {
-        taskModal.show();
-    
-        $('#taskDueDate').datepicker({
-          changeMonth: true,
-          changeYear: true,
-        });
-
-        // Close the modal
-      closeBtn.on('click', function() {
-        taskModal.hide();
-      });
-    
-      // Form submission
-     taskForm.on ('submit', handleAddTask);
-        // Clear the form
-        taskForm[0].reset();
-    
-        // Close the modal
-        taskModal.hide();
-      });
-    
-      
-      
-    
-    
-    
-});
+  });
