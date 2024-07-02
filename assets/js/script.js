@@ -2,6 +2,7 @@
 let taskList = JSON.parse(localStorage.getItem("tasks"));
 let nextId = JSON.parse(localStorage.getItem("nextId"));
 //const TaskId = generateTaskId();
+const taskDisplyEl = $('task-display');
 const formModal = document.getElementById('formModal');
 const openModalBtn = $('#openModel');
 const taskForm = $('.modal-body');
@@ -61,9 +62,9 @@ tasks.push(newTask);
 saveTaskData(tasks);
 printTaskData();
 
- taskNameInputEl.value('');
- taskDescriptionInputEl.value('');
- taskDueDateInputEl.value('');
+ taskNameInputEl.val('');
+ taskDescriptionInputEl.val('');
+ taskDueDateInputEl.val('');
    
  
  };
@@ -94,6 +95,13 @@ function createTaskCard(task) {
   const cardDescription = $('<p>').addClass('card-text').text(task.description);
   // Create a new task paragraph element and add the class `card-text`. Also set the text of the paragraph to the project due date.
   const cardDueDate = $('<p>').addClass('card-text').text(task.dueDate);
+  // Create a new task paragraph element and add the class `card-text`. Also set the text of the paragraph to the project status.
+  const cardStatus = $('<p>').addClass('card-text').text(task.status);
+  // Create a new task paragraph element and add the class `card-text`. Also set the text of the paragraph to the project id.
+  const taskId = $('<p>')
+    .addClass('card-text')
+    .text(task.id)
+    .attr('data-task-id');
   // Create a new task button element and add the classes `btn`, `btn-danger`, and `delete`. Also set the text of the button to "Delete" and add a `data-project-id` attribute and set it to the project id.
   const cardDeletebtn = $('<button>')
     .addClass('btn btn-danger delete')
@@ -116,7 +124,7 @@ function createTaskCard(task) {
   }
 
   //Append the card description, card due date, and card delete button to the card body.
-  cardBody.append(cardDescription, cardDueDate, cardDeletebtn);
+  cardBody.append(cardStatus, cardDescription, cardDueDate, cardDeletebtn);
   taskCard.append(cardHeader, cardBody);
 
   // Append the card header and card body to the card.
@@ -165,7 +173,11 @@ $(document).on('shown.bs.modal','#formModal', function () {
     closeBtn.on('click', function() {
     taskModal.hide();
   });
+
+
 }); 
+
+
 
 // ? Print project data back to the screen
 function printTaskData() {
@@ -224,7 +236,7 @@ function handleDeleteTask(event){
     // TODO: Loop through the projects array and remove the project with the matching id.
     tasks.forEach((task) => {
       if (task.id === taskId) {
-        tasks.splice(tasks.indexof(task), 1);
+        tasks.splice(tasks.indexOf(task), 1);
       }
     });
     
@@ -253,5 +265,7 @@ $(document).ready(function () {
     accept: '.draggable',
     drop: handleDrop,
   });
+  
   addTaskBtn.on('click', addTaskFormSubmit)
+  taskDisplyEl.on('click', '.btn-delete-task', handleDeleteTask);
   });
